@@ -1,0 +1,8 @@
+.mdauth
+*.txt
+Logs/
+json_files/
+__pycache__/
+*.json
+*.log
+api2.py
