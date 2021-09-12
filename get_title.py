@@ -1,10 +1,8 @@
 import requests
-import json
 
 from replacements import check_replacements
 from blocked_groups import check_blocked_group
 from utils import clean_filename
-from known_groups import check_known_group, add_known_group
 
 
 def func_get_chapter_name(chapter_id):
