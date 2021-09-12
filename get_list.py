@@ -1,5 +1,3 @@
-# https://cdn.discordapp.com/attachments/404025002568974347/840186616542396446/unknown.png
-
 import requests
 
 from utils import func_login
@@ -17,16 +15,11 @@ def func_get_feed(download):
     }
 
     param = {
-        "limit": 500,
+        "limit": 100,
         "offset": 0,
         "translatedLanguage[]": "en",
         "order[publishAt]": "desc"
     }
-
-    #         "createdAt": "2021-07-06T00:00:00+00:00",
-
-    # list_response = requests.get(
-    #    url="https://api.mangadex.org/user/follows/manga/feed", headers=head, params=param)
 
     # https://api.mangadex.org/user/follows/manga/feed?limit=10&offset=0&order[publishAt]=desc
 

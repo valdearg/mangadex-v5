@@ -1,7 +1,3 @@
-import json
-import os
-import urllib
-import re
 import requests
 
 from replacements import check_replacements
@@ -53,8 +49,6 @@ def func_get_chapter_name(chapter_id):
                     print("Error obtaining group ID:", group_id)
                     group_name = "UNKNOWN"
 
-            #print("Group name:", group_name)
-
         if i['type'] == "manga":
 
             manga_id = i['id']
@@ -63,8 +57,6 @@ def func_get_chapter_name(chapter_id):
                 url=f"https://api.mangadex.org/manga/{manga_id}", headers=head).json()
 
             manga_name = manga["data"]["attributes"]["title"]["en"]
-
-            #print("Manga name:", manga_name)
 
     if manga_name:
         manga_name = check_replacements(manga_name)
