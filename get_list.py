@@ -31,10 +31,10 @@ def func_get_feed(download):
     with open("Feed.json", "w") as f:
         f.write(list_response.text)
 
-    results = list_response.json()["results"]
+    results = list_response.json()["data"]
 
     for mangas in results:
-        chapter_id = mangas["data"]["id"]
+        chapter_id = mangas["id"]
 
         if download == True:
             print("Downloading chapter:", chapter_id)
