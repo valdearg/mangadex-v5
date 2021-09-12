@@ -10,7 +10,7 @@ def sync_to_rclone():
     data = pd.read_csv('manga.csv', sep='$', header=None)
 
     cur_day = time.strftime('%Y-%m-%d-%H-%M')
-    log_file_name = f"{cur_day}-MangaDex.log"
+    log_file_name = os.path.join("Logs", f"{cur_day}-MangaDex.log")
 
     log_entry = "----------- Synced Manga -----------"
 
