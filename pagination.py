@@ -45,8 +45,8 @@ def paged_result(manga_id):
         offset = results['offset']
         total = results['total']
 
-        for result in results['results']:
-            chapter_id_arr.append(result['data']['id'])
+        for result in results['data']:
+            chapter_id_arr.append(result['id'])
 
     print(f"Total chapters: {total}")
 
