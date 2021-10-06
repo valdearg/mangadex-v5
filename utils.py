@@ -17,6 +17,7 @@ def check_downloaded(chapter_id):
 
 def clean_filename(filename):
     filename = filename.replace("...", "")
+    filename = filename.replace("..", "")
     filename = filename.replace("/", "／")
     filename = filename.replace(":", "")
     filename = filename.replace("<", "")
@@ -33,6 +34,9 @@ def clean_filename(filename):
     filename = filename.replace('´', '')
     filename = filename.replace("\\", "")
     filename = html.unescape(filename)
+
+    if filename.endswith('.'):
+        filename = filename[:-1]
 
     return filename
 

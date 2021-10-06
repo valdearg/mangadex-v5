@@ -36,6 +36,7 @@ def func_get_chapter_name(chapter_id):
 
     if manga_name:
         manga_name = check_replacements(manga_name)
+        manga_name = clean_filename(manga_name)
         full_title = f'{manga_name}'
 
     if chapter_num:
