@@ -32,7 +32,10 @@ def func_get_chapter_name(chapter_id):
             group_name = i["attributes"]["name"]
 
         if i['type'] == "manga":
-            manga_name = i["attributes"]["title"]['en']
+            try:
+                manga_name = i["attributes"]["title"]['en']
+            except:
+                manga_name = i["attributes"]["title"]['ja']
 
     if manga_name:
         manga_name = check_replacements(manga_name)
