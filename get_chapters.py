@@ -48,6 +48,12 @@ def func_download_chapter(chapter_id):
 
     chapter_hash = chapter_data["data"]["attributes"]["hash"]
 
+    if not chapter_hash:
+        print("No chapter hash available, could be that the chapter isn't available yet!")
+        print("PublishAt: {}".format(
+            chapter_data["data"]["attributes"]["publishAt"]))
+        return
+
     filenames = []
 
     for img in chapter_data["data"]["attributes"]["data"]:
