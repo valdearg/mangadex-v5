@@ -20,7 +20,7 @@ def sync_to_rclone():
     identified_filenames_array = []
     not_synced_filenames_array = []
 
-    rclone_providers = ["OneDrive", "nextcloud"]
+    rclone_providers = ["nextcloud"]
 
     for manga in data.values:
         mad_path = manga[0]
