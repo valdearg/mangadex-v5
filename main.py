@@ -1,6 +1,7 @@
 import argparse
 import glob
 import os
+import sys
 
 from pagination import paged_result
 from get_chapters import func_download_chapter
@@ -8,6 +9,12 @@ from search import search_manga
 from get_list import func_get_feed
 from sync_rclone import sync_to_rclone
 
+if os.path.exists('running'):
+    sys.exit("Mangadex running already")
+
+if os.path.exists("running") is False:
+    f = open("running", "w+")
+    f.close()
 
 parser = argparse.ArgumentParser(description='Download chapters')
 parser.add_argument('input')
@@ -60,3 +67,6 @@ elif "sync" in args.input:
 
 else:
     print("No args entered. Try: feed/chapter/search/manga/sync")
+
+if os.path.exists('running'):
+    os.remove('running')
