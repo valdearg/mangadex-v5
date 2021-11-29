@@ -38,11 +38,6 @@ def func_download_chapter(chapter_id):
         print("ZIP file downloaded already, returning")
         return
 
-    md_at_home_url = requests.get(
-        url=f"https://api.mangadex.org/at-home/server/{chapter_id}", headers=head)
-
-    md_at_home_url = md_at_home_url.json()["baseUrl"]
-
     chapter_data = requests.get(
         url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
 
@@ -53,6 +48,11 @@ def func_download_chapter(chapter_id):
         print("PublishAt: {}".format(
             chapter_data["data"]["attributes"]["publishAt"]))
         return
+
+    md_at_home_url = requests.get(
+        url=f"https://api.mangadex.org/at-home/server/{chapter_id}", headers=head)
+
+    md_at_home_url = md_at_home_url.json()["baseUrl"]
 
     filenames = []
 
