@@ -18,6 +18,8 @@ def func_get_chapter_name(chapter_id):
     chapter_title = chapter_data["data"]["attributes"]["title"]
     published_at = chapter_data["data"]["attributes"]["publishAt"]
 
+    group_name = None
+
     for i in chapter_data["data"]["relationships"]:
 
         if i['type'] == "scanlation_group":
@@ -29,7 +31,10 @@ def func_get_chapter_name(chapter_id):
             if is_blocked_group is True:
                 return None, None
 
-            group_name = i["attributes"]["name"]
+            if group_name:
+                group_name = group_name + ", " + i["attributes"]["name"]
+            else:
+                group_name = i["attributes"]["name"]
 
         if i['type'] == "manga":
             try:
@@ -70,6 +75,3 @@ def func_get_chapter_name(chapter_id):
     print(f'Full title now: {full_title} ({published_at})')
 
     return full_title, published_at
-
-
-#zip_title, date_added = func_get_chapter_name(chapter_id, token)
