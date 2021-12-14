@@ -72,3 +72,4 @@ def sync_to_rclone():
         os.system(command)
     else:
         print("No files synced, not emailing")
+        os.remove(log_file_name)
