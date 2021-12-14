@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import sys
+import time
 
 from pagination import paged_result
 from get_chapters import func_download_chapter
@@ -10,6 +11,9 @@ from get_list import func_get_feed
 from sync_rclone import sync_to_rclone
 
 if os.path.exists('running'):
+    cur_day = time.strftime('%Y-%m-%d-%H-%M')
+    command = f'mail -s "MangaDex Sync: Failed" root'
+    os.system(command)
     sys.exit("Mangadex running already")
 
 if os.path.exists("running") is False:
