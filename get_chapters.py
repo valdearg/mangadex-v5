@@ -39,9 +39,9 @@ def func_download_chapter(chapter_id):
         return
 
     chapter_data = requests.get(
-        url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
+        url=f"https://api.mangadex.org/at-home/server/{chapter_id}", headers=head).json()
 
-    chapter_hash = chapter_data["data"]["attributes"]["hash"]
+    chapter_hash = chapter_data["chapter"]["hash"]
 
     if not chapter_hash:
         print("No chapter hash available, could be that the chapter isn't available yet!")
@@ -49,16 +49,12 @@ def func_download_chapter(chapter_id):
             chapter_data["data"]["attributes"]["publishAt"]))
         return
 
-    md_at_home_url = requests.get(
-        url=f"https://api.mangadex.org/at-home/server/{chapter_id}", headers=head)
-
-    md_at_home_url = md_at_home_url.json()["baseUrl"]
+    md_at_home_url = chapter_data["baseUrl"]
 
     filenames = []
 
-    for img in chapter_data["data"]["attributes"]["data"]:
+    for img in chapter_data["chapter"]["data"]:
         chapter_url = f"{md_at_home_url}/data/{chapter_hash}/{img}"
-        #print("Img:", chapter_url)
 
         resp = requests.get(chapter_url, stream=True)
         total = int(resp.headers.get('content-length', 0))
@@ -120,7 +116,6 @@ def func_download_chapter(chapter_id):
             auth_response = requests.post(
                 url="https://api.mangadex.network/report", json=params)
 
-            # print(params)
         else:
             params = {
                 "url": chapter_url,
@@ -129,8 +124,6 @@ def func_download_chapter(chapter_id):
                 "duration": resp.elapsed.microseconds,
                 "cached": cached
             }
-
-            # print(params)
 
             auth_response = requests.post(
                 url="https://api.mangadex.network/report", json=params)
@@ -157,9 +150,6 @@ def func_download_chapter(chapter_id):
         os.remove(file_name)
 
     date_added_tuple = time.mktime(parser.parse(date_added).timetuple())
-
-    #print("Date added:", date_added_tuple)
-    #print("Date added (normal):", date_added)
 
     path = os.getcwd()
 
