@@ -38,10 +38,8 @@ def sync_to_rclone():
                         temp.write(str(filename + "\n"))
 
                     for rclone_provider in rclone_providers:
-                        #command = f'rclone copy -v --log-file sync_manga.log "{filename.rstrip()}" "{rclone_provider}:Manga/{od_path.rstrip()}"'
                         print(f"Syncing to: {rclone_provider}")
                         command = f'rclone copy -v --log-file sync_manga.log "{filename.rstrip()}" "{rclone_provider}:Manga/{od_path.rstrip()}"'
-                        #print("rclone path:", command)
                         os.system(command)
 
                     try:

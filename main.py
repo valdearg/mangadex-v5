@@ -12,7 +12,7 @@ from sync_rclone import sync_to_rclone
 
 if os.path.exists('running'):
     cur_day = time.strftime('%Y-%m-%d-%H-%M')
-    command = f'mail -s "MangaDex Sync: Failed" root'
+    command = f'mail -s "MangaDex Sync: running already" root'
     os.system(command)
     sys.exit("Mangadex running already")
 
