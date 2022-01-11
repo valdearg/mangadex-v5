@@ -41,10 +41,17 @@ def func_download_chapter(chapter_id):
     chapter_data = requests.get(
         url=f"https://api.mangadex.org/at-home/server/{chapter_id}", headers=head).json()
 
-    chapter_hash = chapter_data["chapter"]["hash"]
+    if chapter_data['result'] == "ok":
+        chapter_hash = chapter_data["chapter"]["hash"]
+    else:
+        chapter_hash = None
 
     if not chapter_hash:
         print("No chapter hash available, could be that the chapter isn't available yet!")
+
+        chapter_data = requests.get(
+            url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
+
         print("PublishAt: {}".format(
             chapter_data["data"]["attributes"]["publishAt"]))
         return
