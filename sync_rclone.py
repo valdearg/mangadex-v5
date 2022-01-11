@@ -68,6 +68,9 @@ def sync_to_rclone():
     if len(identified_filenames_array) >= 1:
         command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
         os.system(command)
+    elif len(not_synced_filenames_array) >= 1:
+        command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
+        os.system(command)
     else:
         print("No files synced, not emailing")
         os.remove(log_file_name)
