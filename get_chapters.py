@@ -1,17 +1,28 @@
 import os
-import zipfile
+import platform
 import time
 import traceback
-import platform
+import zipfile
 
 import requests
 from dateutil import parser
+from fake_useragent import UserAgent
+from requests.adapters import HTTPAdapter, Retry
 from tqdm import tqdm
 
 from get_title import func_get_chapter_name
 from utils import check_downloaded
 
 os_name = platform.system()
+ua = UserAgent(verify_ssl=False)
+
+s = requests.Session()
+
+retries = Retry(total=5,
+                backoff_factor=0.1,
+                status_forcelist=[500, 502, 503, 504])
+
+s.mount('https://', HTTPAdapter(max_retries=retries))
 
 
 def func_download_chapter(chapter_id):
@@ -78,7 +89,8 @@ def func_download_chapter(chapter_id):
         if md_at_home_url == "https://uploads.mangadex.org":
             time.sleep(1)
 
-        resp = requests.get(chapter_url, stream=True)
+        resp = s.get(chapter_url, stream=True,
+                     headers={'User-Agent': ua.chrome})
         total = int(resp.headers.get('content-length', 0))
 
         if resp.headers.get('X-Cache') == "HIT":
