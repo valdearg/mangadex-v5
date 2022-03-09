@@ -69,9 +69,6 @@ def func_download_chapter(chapter_id):
 
     md_at_home_url = chapter_data["baseUrl"]
 
-    if md_at_home_url == "https://uploads.mangadex.org":
-        print("Adding a wait between each image download")
-
     filenames = []
     img_num = 0
 
@@ -85,9 +82,6 @@ def func_download_chapter(chapter_id):
 
         if len(counting[0]) > 10:
             img = f"{img_num}-{counting[1]}"
-
-        if md_at_home_url == "https://uploads.mangadex.org":
-            time.sleep(1)
 
         resp = s.get(chapter_url, stream=True,
                      headers={'User-Agent': ua.chrome})
