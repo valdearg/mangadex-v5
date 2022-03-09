@@ -60,8 +60,11 @@ elif "manga" in args.input:
     for manga_id in manga_ids:
         chapters = paged_result(manga_id)
 
+        num = 0
+
         for chapter in chapters:
-            print("Downloading chapter:", chapter)
+            num += 1
+            print(f"Downloading chapter: {chapter} ({num}/{len(chapters)})")
             func_download_chapter(chapter)
 
 elif "sync" in args.input:
