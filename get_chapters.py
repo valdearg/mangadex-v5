@@ -49,7 +49,7 @@ def func_download_chapter(chapter_id):
         print("ZIP file downloaded already, returning")
         return
 
-    chapter_data = requests.get(
+    chapter_data = s.get(
         url=f"https://api.mangadex.org/at-home/server/{chapter_id}", headers=head).json()
 
     if chapter_data['result'] == "ok":
@@ -60,7 +60,7 @@ def func_download_chapter(chapter_id):
     if not chapter_hash:
         print("No chapter hash available, could be that the chapter isn't available yet!")
 
-        chapter_data = requests.get(
+        chapter_data = s.get(
             url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
 
         print("PublishAt: {}".format(
@@ -103,7 +103,7 @@ def func_download_chapter(chapter_id):
 
             print("Error downloading chapter, reporting")
 
-            auth_response = requests.post(
+            auth_response = s.post(
                 url="https://api.mangadex.network/report", json=params)
 
             return
@@ -141,7 +141,7 @@ def func_download_chapter(chapter_id):
                 "cached": cached
             }
 
-            auth_response = requests.post(
+            auth_response = s.post(
                 url="https://api.mangadex.network/report", json=params)
 
         else:
@@ -153,7 +153,7 @@ def func_download_chapter(chapter_id):
                 "cached": cached
             }
 
-            auth_response = requests.post(
+            auth_response = s.post(
                 url="https://api.mangadex.network/report", json=params)
 
             return
