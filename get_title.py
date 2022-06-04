@@ -32,9 +32,9 @@ def func_get_chapter_name(chapter_id):
                 return None, None
 
             if group_name:
-                group_name = group_name + " & " + i["attributes"]["name"]
+                group_name = group_name + " & " + i["attributes"]["name"].strip()
             else:
-                group_name = i["attributes"]["name"]
+                group_name = i["attributes"]["name"].strip()
 
         if i['type'] == "manga":
             try:
