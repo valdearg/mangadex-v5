@@ -35,7 +35,7 @@ def sync_to_rclone():
                     print("Syncing file:", filename)
 
                     with io.open(log_file_name, "a+", encoding='utf-8') as temp:
-                        temp.write(str(filename + "\n"))
+                        temp.write(f"{str(filename)} => {od_path.rstrip()}" + "\n")
 
                     for rclone_provider in rclone_providers:
                         print(f"Syncing to: {rclone_provider}")
