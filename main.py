@@ -22,8 +22,11 @@ if os.path.exists("running") is False:
 
 parser = argparse.ArgumentParser(description='Download chapters')
 parser.add_argument('input')
+parser.add_argument('-i', '--ignore', action='store_true')
 
 args = parser.parse_args()
+
+print(f"Skipping existing downloads: {args.ignore}")
 
 for f in glob.glob('*.png'):
     os.remove(f)
@@ -33,11 +36,11 @@ for f in glob.glob('*.jpg'):
 
 if "feed_chaps" in args.input:
     print("Downloading feed!")
-    func_get_feed(False)
+    func_get_feed(False, args.ignore)
 
 if "feed" in args.input:
     print("Downloading feed!")
-    func_get_feed(True)
+    func_get_feed(True, args.ignore)
 
 elif "chapter" in args.input:
     user_choice = input("Enter chapter ID(s): ")
@@ -46,7 +49,7 @@ elif "chapter" in args.input:
 
     for chapter_id in chapter_ids:
         print("Downloading chapter:", chapter_id)
-        func_download_chapter(chapter_id)
+        func_download_chapter(chapter_id, args.ignore)
 
 elif "search" in args.input:
     user_choice = input("Enter search term: ")
@@ -65,7 +68,7 @@ elif "manga" in args.input:
         for chapter in chapters:
             num += 1
             print(f"Downloading chapter: {chapter} ({num}/{len(chapters)})")
-            func_download_chapter(chapter)
+            func_download_chapter(chapter, args.ignore)
 
 elif "sync" in args.input:
     print("Syncing to cloud!")

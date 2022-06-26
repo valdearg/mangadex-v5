@@ -5,7 +5,7 @@ from get_chapters import func_download_chapter
 from get_title import func_get_chapter_name
 
 
-def func_get_feed(download):
+def func_get_feed(download, ignore):
 
     token = func_login()
 
@@ -38,7 +38,7 @@ def func_get_feed(download):
 
         if download == True:
             print("Downloading chapter:", chapter_id)
-            func_download_chapter(chapter_id)
+            func_download_chapter(chapter_id, ignore)
         else:
             print("Chapter:", chapter_id)
             func_get_chapter_name(chapter_id)

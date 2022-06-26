@@ -25,16 +25,17 @@ retries = Retry(total=5,
 s.mount('https://', HTTPAdapter(max_retries=retries))
 
 
-def func_download_chapter(chapter_id):
+def func_download_chapter(chapter_id, ignore):
     head = {
         "Content-Type": "application/json"
     }
 
-    has_been_downloaded = check_downloaded(chapter_id)
+    if ignore is False:
+        has_been_downloaded = check_downloaded(chapter_id)
 
-    if has_been_downloaded is True:
-        print("Already downloaded:", chapter_id)
-        return
+        if has_been_downloaded is True:
+            print("Already downloaded:", chapter_id)
+            return
 
     dest_zip_file, date_added = func_get_chapter_name(chapter_id)
 
