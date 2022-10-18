@@ -49,6 +49,13 @@ def func_login():
 
     auth_response = requests.post(
         url="https://api.mangadex.org/auth/login", json=auth)
+
+    if auth_response.status_code != 200:
+        print("Error with MangaDex, exiting")
+        if os.path.exists('running'):
+            os.remove('running')
+        quit()
+        
     token = auth_response.json()["token"]["session"]
 
     with open('.mdauth', 'w') as f:
