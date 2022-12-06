@@ -4,6 +4,10 @@ import os
 import sys
 import time
 
+import json
+import requests
+from requests.auth import HTTPBasicAuth
+
 from pagination import paged_result
 from get_chapters import func_download_chapter
 from search import search_manga
@@ -23,6 +27,7 @@ if os.path.exists("running") is False:
 parser = argparse.ArgumentParser(description='Download chapters')
 parser.add_argument('input')
 parser.add_argument('-i', '--ignore', action='store_true')
+parser.add_argument('-k', '--komga', action='store_true')
 
 args = parser.parse_args()
 
@@ -74,6 +79,22 @@ elif "sync" in args.input:
     print("Syncing to cloud!")
 
     sync_to_rclone()
+
+    if args.komga:
+        if os.path.exists(".komga"):
+
+            print("Scan Komga lib")
+
+            head = {
+                "Content-Type": "application/json"
+            }
+
+            komga_data = json.loads(open(".komga", "r", encoding="utf-8").read())
+
+            for lib_id in komga_data['library_id'].split(','):
+                library_response = requests.post(
+                    url=f"{komga_data['base_url']}/libraries/{lib_id}/scan", auth=HTTPBasicAuth(
+                        komga_data['username'],komga_data['password'] ))
 
 else:
     print("No args entered. Try: feed/chapter/search/manga/sync")
