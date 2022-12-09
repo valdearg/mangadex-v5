@@ -24,6 +24,11 @@ if os.path.exists("running") is False:
     f = open("running", "w+")
     f.close()
 
+if os.path.exists(".komga"):
+    sync_komga_library = True
+else:
+    sync_komga_library = False
+
 parser = argparse.ArgumentParser(description='Download chapters')
 parser.add_argument('input')
 parser.add_argument('-i', '--ignore', action='store_true')
@@ -78,9 +83,9 @@ elif "manga" in args.input:
 elif "sync" in args.input:
     print("Syncing to cloud!")
 
-    sync_to_rclone()
+    synced_item_count = sync_to_rclone()
 
-    if args.komga:
+    if sync_komga_library and synced_item_count >= 1:
         if os.path.exists(".komga"):
 
             print("Scan Komga lib")
