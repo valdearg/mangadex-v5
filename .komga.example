@@ -1,0 +1,6 @@
+{
+    "username": "username@domain",
+    "password": "password",
+    "base_url": "https://komga_url/api/v1",
+    "library_id": "124367"
+}
