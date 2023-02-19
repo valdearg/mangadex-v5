@@ -20,7 +20,7 @@ def sync_to_rclone():
     identified_filenames_array = []
     not_synced_filenames_array = []
 
-    rclone_providers = ["nextcloud"]
+    rclone_providers = ["nextcloud", "rin-komga"]
 
     for manga in data.values:
         mad_path = manga[0]
@@ -31,7 +31,8 @@ def sync_to_rclone():
         # checking for existing files with _ in them and then renaming them
         for filename in sorted(os.listdir(os.getcwd())):
             if ".zip" in filename:
-                if jap_name.upper() in filename.upper():
+                chapter_series = filename.split(' - c')[0]
+                if jap_name.upper() in chapter_series.upper():
                     print("Syncing file:", filename)
 
                     with io.open(log_file_name, "a+", encoding='utf-8') as temp:
