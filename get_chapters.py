@@ -18,8 +18,8 @@ ua = UserAgent(verify_ssl=False)
 
 s = requests.Session()
 
-retries = Retry(total=5,
-                backoff_factor=0.1,
+retries = Retry(total=10,
+                backoff_factor=0.5,
                 status_forcelist=[500, 502, 503, 504])
 
 s.mount('https://', HTTPAdapter(max_retries=retries))
