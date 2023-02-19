@@ -51,7 +51,7 @@ def func_login():
         url="https://api.mangadex.org/auth/login", json=auth)
 
     if auth_response.status_code != 200:
-        print("Error with MangaDex, exiting")
+        print(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
         if os.path.exists('running'):
             os.remove('running')
         quit()
