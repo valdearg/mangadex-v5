@@ -18,7 +18,9 @@ def func_get_feed(download, ignore):
         "limit": 100,
         "offset": 0,
         "translatedLanguage[]": "en",
-        "order[publishAt]": "desc"
+        "order[publishAt]": "desc",
+        "includeFuturePublishAt": "0",
+        "includeExternalUrl": "0"
     }
 
     # https://api.mangadex.org/user/follows/manga/feed?limit=10&offset=0&order[publishAt]=desc
