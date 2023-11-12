@@ -7,6 +7,7 @@ import time
 import json
 import requests
 from requests.auth import HTTPBasicAuth
+from tendo import singleton
 
 from pagination import paged_result
 from get_chapters import func_download_chapter
@@ -14,6 +15,14 @@ from search import search_manga
 from get_list import func_get_feed
 from sync_rclone import sync_to_rclone
 
+
+try:
+    me = singleton.SingleInstance()
+except:
+    print("Already running")
+    sys.exit(-1)
+
+'''
 if os.path.exists('running'):
     cur_day = time.strftime('%Y-%m-%d-%H-%M')
     command = f'mail -s "MangaDex Sync: running already" root << "MangaDex Sync: running already"'
@@ -23,6 +32,7 @@ if os.path.exists('running'):
 if os.path.exists("running") is False:
     f = open("running", "w+")
     f.close()
+'''
 
 if os.path.exists(".komga"):
     sync_komga_library = True
@@ -58,6 +68,9 @@ elif "chapter" in args.input:
     chapter_ids = user_choice.split(' ')
 
     for chapter_id in chapter_ids:
+        if "mangadex" in chapter_id:
+            chapter_id = chapter_id.split('/')[-1]
+            
         print("Downloading chapter:", chapter_id)
         func_download_chapter(chapter_id, args.ignore)
 
@@ -104,5 +117,7 @@ elif "sync" in args.input:
 else:
     print("No args entered. Try: feed/chapter/search/manga/sync")
 
+'''
 if os.path.exists('running'):
     os.remove('running')
+'''
