@@ -3,6 +3,8 @@ import os
 import io
 import time
 
+from send_email import func_send_email
+
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
@@ -69,11 +71,13 @@ def sync_to_rclone():
             not_synced_filenames_array.append(filename)
 
     if len(identified_filenames_array) >= 1:
-        command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
-        os.system(command)
+        #command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
+        #os.system(command)
+        func_send_email(cur_day, log_file_name)
     elif len(not_synced_filenames_array) >= 1:
-        command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
-        os.system(command)
+        #command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
+        #os.system(command)
+        func_send_email(cur_day, log_file_name)
     else:
         print("No files synced, not emailing")
         os.remove(log_file_name)
