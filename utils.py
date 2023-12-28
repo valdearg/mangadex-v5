@@ -3,6 +3,8 @@ import os
 import re
 import urllib
 import html
+import pandas as pd
+import csv
 
 import requests
 
@@ -85,3 +87,44 @@ def check_login(sess):
         sess = func_login()
 
     return sess
+
+def get_manga_title(manga_id):
+    data = pd.read_csv("MangaTitleDatabase.csv", sep="$", header=None)
+
+    for manga in data.values:
+        if manga_id == manga[0]:
+            print(f"Found title: {manga[1]} for ID: {manga_id}")
+            return manga[1]
+
+    print("Manga ID not found, locating the new name")
+
+    manga_data = requests.get(
+        url=f"https://api.mangadex.org/manga/{manga_id}").json()['data']
+
+    if manga_data['type'] == "manga":
+        if "en" in manga_data["attributes"]["title"]:
+            manga_name = manga_data["attributes"]["title"]['en']
+        elif "ja" in manga_data["attributes"]["title"]:
+            manga_name = manga_data["attributes"]["title"]['ja']
+        elif "ja-ro" in manga_data["attributes"]["title"]:
+            manga_name = manga_data["attributes"]["title"]['ja-ro']
+
+    if manga_name:
+        manga_name = clean_filename(manga_name)
+        full_title = f'{manga_name}'
+
+    print(f"{full_title} ({manga_id})")
+
+    with open("MangaTitleDatabase.csv", mode="a+", encoding="utf-8", newline="") as file:
+        file_writer = csv.writer(
+            file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL
+        )
+
+        file_writer.writerow(
+            [
+                manga_id,
+                full_title,
+            ]
+        )
+
+    return full_title

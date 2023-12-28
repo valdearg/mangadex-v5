@@ -2,7 +2,7 @@ import requests
 
 from replacements import check_replacements
 from blocked_groups import check_blocked_group
-from utils import clean_filename
+from utils import clean_filename, get_manga_title
 
 
 def func_get_chapter_name(chapter_id):
@@ -37,17 +37,7 @@ def func_get_chapter_name(chapter_id):
                 group_name = i["attributes"]["name"].strip()
 
         if i['type'] == "manga":
-            if "en" in i["attributes"]["title"]:
-                manga_name = i["attributes"]["title"]['en']
-            elif "ja" in i["attributes"]["title"]:
-                manga_name = i["attributes"]["title"]['ja']
-            elif "ja-ro" in i["attributes"]["title"]:
-                manga_name = i["attributes"]["title"]['ja-ro']
-
-    if manga_name:
-        manga_name = check_replacements(manga_name)
-        manga_name = clean_filename(manga_name)
-        full_title = f'{manga_name}'
+            full_title = get_manga_title(i['id'])
 
     if chapter_num:
         chapter_num = chapter_num.zfill(3)
