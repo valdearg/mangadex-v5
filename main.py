@@ -7,6 +7,7 @@ import time
 import json
 import requests
 from requests.auth import HTTPBasicAuth
+from requests.adapters import HTTPAdapter, Retry
 from tendo import singleton
 
 from pagination import paged_result
@@ -39,6 +40,15 @@ if os.path.exists(".komga"):
 else:
     sync_komga_library = False
 
+s = requests.Session()
+
+retries = Retry(total=10,
+                backoff_factor=0.5,
+                status_forcelist=[500, 502, 503, 504])
+
+s.mount('https://', HTTPAdapter(max_retries=retries))
+
+
 parser = argparse.ArgumentParser(description='Download chapters')
 parser.add_argument('input')
 parser.add_argument('-i', '--ignore', action='store_true')
@@ -70,9 +80,18 @@ elif "chapter" in args.input:
     for chapter_id in chapter_ids:
         if "mangadex" in chapter_id:
             chapter_id = chapter_id.split('/')[-1]
+
+        head = {
+            "Content-Type": "application/json"
+        }
+        
+        chapter_data = s.get(
+            url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
+        
+        volume = chapter_data["data"]["attributes"]["volume"]
             
         print("Downloading chapter:", chapter_id)
-        func_download_chapter(chapter_id, args.ignore)
+        func_download_chapter(chapter_id, args.ignore, volume)
 
 elif "search" in args.input:
     user_choice = input("Enter search term: ")
@@ -90,8 +109,10 @@ elif "manga" in args.input:
 
         for chapter in chapters:
             num += 1
+            chapter_id = chapter[0]
+            version = chapter[1]
             print(f"Downloading chapter: {chapter} ({num}/{len(chapters)})")
-            func_download_chapter(chapter, args.ignore)
+            func_download_chapter(chapter_id, args.ignore, version)
 
 elif "sync" in args.input:
     print("Syncing to cloud!")

@@ -46,7 +46,7 @@ def paged_result(manga_id):
         total = results['total']
 
         for result in results['data']:
-            chapter_id_arr.append(result['id'])
+            chapter_id_arr.append([result['id'], result["attributes"]['version']])
 
     print(f"Total chapters: {total}")
 

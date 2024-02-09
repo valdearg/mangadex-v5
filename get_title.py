@@ -17,6 +17,7 @@ def func_get_chapter_name(chapter_id):
     chapter_num = chapter_data["data"]["attributes"]["chapter"]
     chapter_title = chapter_data["data"]["attributes"]["title"]
     published_at = chapter_data["data"]["attributes"]["publishAt"]
+    updated_at = chapter_data["data"]["attributes"]["updatedAt"]
 
     group_name = None
 
@@ -64,6 +65,6 @@ def func_get_chapter_name(chapter_id):
 
     full_title = clean_filename(full_title)
 
-    print(f'Full title now: {full_title} ({published_at})')
+    print(f'Full title now: {full_title} ({updated_at})')
 
-    return full_title, published_at
+    return full_title, updated_at

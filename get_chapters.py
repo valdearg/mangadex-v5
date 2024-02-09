@@ -3,6 +3,7 @@ import platform
 import time
 import traceback
 import zipfile
+import csv
 
 import requests
 from dateutil import parser
@@ -11,7 +12,7 @@ from requests.adapters import HTTPAdapter, Retry
 from tqdm import tqdm
 
 from get_title import func_get_chapter_name
-from utils import check_downloaded
+from utils import check_downloaded, check_downloaded_new
 
 os_name = platform.system()
 ua = UserAgent(verify_ssl=False)
@@ -25,16 +26,22 @@ retries = Retry(total=10,
 s.mount('https://', HTTPAdapter(max_retries=retries))
 
 
-def func_download_chapter(chapter_id, ignore):
+def func_download_chapter(chapter_id, ignore, version):
     head = {
         "Content-Type": "application/json"
     }
 
     if ignore is False:
-        has_been_downloaded = check_downloaded(chapter_id)
+        has_been_downloaded_old = check_downloaded(chapter_id)
 
-        if has_been_downloaded is True:
+        if has_been_downloaded_old is True:
             print("Already downloaded:", chapter_id)
+            return
+
+        has_been_downloaded_new = check_downloaded_new(chapter_id, version)
+
+        if has_been_downloaded_new is True:
+            print("Already downloaded (New!):", chapter_id)
             return
 
     dest_zip_file, date_added = func_get_chapter_name(chapter_id)
@@ -192,8 +199,19 @@ def func_download_chapter(chapter_id, ignore):
     except:
         print("Error changing time")
 
-    if os.path.exists(dest_zip_file):
-        downloaded = open("downloaded.txt", "a")
+    #if os.path.exists(dest_zip_file):
+    #    downloaded = open("downloaded.txt", "a")
+    #    downloaded.write(chapter_id + "\n")
+    #    downloaded.close()
 
-        downloaded.write(chapter_id + "\n")
-        downloaded.close()
+    with open("downloaded.csv", mode="a+", encoding="utf-8", newline="") as file:
+        file_writer = csv.writer(
+            file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL
+        )
+
+        file_writer.writerow(
+            [
+                chapter_id,
+                version,
+            ]
+        )

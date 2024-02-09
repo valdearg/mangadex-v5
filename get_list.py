@@ -1,13 +1,13 @@
 import requests
 
-from utils import func_login
+from utils import func_login_client_id
 from get_chapters import func_download_chapter
 from get_title import func_get_chapter_name
 
 
 def func_get_feed(download, ignore):
 
-    token = func_login()
+    token = func_login_client_id()
 
     head = {
         "Authorization": f"Bearer {token}",
@@ -37,10 +37,11 @@ def func_get_feed(download, ignore):
 
     for mangas in results:
         chapter_id = mangas["id"]
+        version = mangas["attributes"]['version']
 
         if download == True:
             print("Downloading chapter:", chapter_id)
-            func_download_chapter(chapter_id, ignore)
+            func_download_chapter(chapter_id, ignore, version)
         else:
             print("Chapter:", chapter_id)
             func_get_chapter_name(chapter_id)
