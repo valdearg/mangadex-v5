@@ -35,7 +35,7 @@ def func_download_chapter(chapter_id, ignore, version):
         has_been_downloaded_old = check_downloaded(chapter_id)
 
         if has_been_downloaded_old is True:
-            print("Already downloaded:", chapter_id)
+            print("Already downloaded (Original):", chapter_id)
             return
 
         has_been_downloaded_new = check_downloaded_new(chapter_id, version)
