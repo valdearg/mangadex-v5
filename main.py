@@ -117,7 +117,9 @@ elif "manga" in args.input:
 elif "sync" in args.input:
     print("Syncing to cloud!")
 
-    synced_item_count = sync_to_rclone()
+    synced_item_data = sync_to_rclone()
+
+    synced_item_count = len(synced_item_data)
 
     if sync_komga_library and synced_item_count >= 1:
         if os.path.exists(".komga"):
@@ -134,6 +136,40 @@ elif "sync" in args.input:
                 library_response = requests.post(
                     url=f"{komga_data['base_url']}/libraries/{lib_id}/scan", auth=HTTPBasicAuth(
                         komga_data['username'],komga_data['password'] ))
+                
+            for book in synced_item_data:
+                book_name, ext = os.path.splitext(book)
+
+                search_term = book.split(" [")[0]
+
+                for lib_id in komga_data['library_id'].split(','):
+
+                    url = f"{komga_data['base_url']}/books?search={search_term}&library_id={lib_id}"
+
+                    result = requests.get(
+                        url,
+                        auth=HTTPBasicAuth(komga_data["username"], komga_data["password"]),
+                        headers=head,
+                        timeout=30,
+                    )
+
+                    if result:
+                        result_data = result.json()
+                        print(f"Located: {result_data['totalElements']} results")
+
+                        for search_result in result_data["content"]:
+                            if search_result["name"] == book_name:
+                                print("Book name found!")
+
+                                url = f"{komga_data['base_url']}/books/{search_result['id']}/analyze"
+
+                                result = requests.post(
+                                    url,
+                                    auth=HTTPBasicAuth(komga_data["username"], komga_data["password"]),
+                                    headers=head,
+                                    timeout=30,
+                                )
+
 
 else:
     print("No args entered. Try: feed/chapter/search/manga/sync")
