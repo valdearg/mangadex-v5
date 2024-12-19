@@ -8,6 +8,7 @@ import time
 import requests
 from dateutil import parser
 from get_chapters import func_download_chapter
+from utils import func_log_to_file
 
 
 def paged_result(manga_id):
@@ -48,6 +49,6 @@ def paged_result(manga_id):
         for result in results['data']:
             chapter_id_arr.append([result['id'], result["attributes"]['version']])
 
-    print(f"Total chapters: {total}")
+    func_log_to_file(f"Total chapters: {total}")
 
     return chapter_id_arr

@@ -1,6 +1,6 @@
 import requests
 
-from utils import func_login_client_id
+from utils import func_login_client_id, func_log_to_file
 from get_chapters import func_download_chapter
 from get_title import func_get_chapter_name
 
@@ -28,7 +28,7 @@ def func_get_feed(download, ignore):
     list_response = requests.get(
         url="https://api.mangadex.org/user/follows/manga/feed", headers=head, params=param)
 
-    print(list_response.status_code)
+    func_log_to_file(list_response.status_code)
 
     with open("Feed.json", "w") as f:
         f.write(list_response.text)
@@ -40,8 +40,8 @@ def func_get_feed(download, ignore):
         version = mangas["attributes"]['version']
 
         if download == True:
-            print("Downloading chapter:", chapter_id)
+            func_log_to_file(f"Downloading chapter: {chapter_id}")
             func_download_chapter(chapter_id, ignore, version)
         else:
-            print("Chapter:", chapter_id)
+            func_log_to_file(f"Chapter: {chapter_id}")
             func_get_chapter_name(chapter_id)

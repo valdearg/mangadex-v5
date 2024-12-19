@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from csv import writer
-
+from utils import func_log_to_file
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -11,7 +11,7 @@ def check_known_group(group_id):
 
     for manga in data.values:
         if group_id == manga[0]:
-            print(f"Known group: {manga[1]} (ID: {group_id})")
+            func_log_to_file(f"Known group: {manga[1]} (ID: {group_id})")
             return manga[1]
 
     return None

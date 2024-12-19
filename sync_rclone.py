@@ -2,6 +2,7 @@ import pandas as pd
 import os
 import io
 import time
+from utils import func_log_to_file
 
 from send_email import func_send_email
 
@@ -22,7 +23,8 @@ def sync_to_rclone():
     identified_filenames_array = []
     not_synced_filenames_array = []
 
-    rclone_providers = ["nextcloud", "rin-komga"]
+    #rclone_providers = ["nextcloud", "rin-komga"]
+    rclone_providers = ["rin-komga"]
 
     for manga in data.values:
         mad_path = manga[0]
@@ -35,14 +37,14 @@ def sync_to_rclone():
             if ".zip" in filename:
                 chapter_series = filename.split(' - c')[0]
                 if jap_name.upper() in chapter_series.upper():
-                    print("Syncing file:", filename)
+                    func_log_to_file(f"Syncing file: {filename}")
 
                     with io.open(log_file_name, "a+", encoding='utf-8') as temp:
                         temp.write(f"{str(filename)} => {od_path.rstrip()}" + "\n")
 
                     for rclone_provider in rclone_providers:
                         if len(rclone_providers) > 1:
-                            print(f"Syncing to: {rclone_provider}")
+                            func_log_to_file(f"Syncing to: {rclone_provider}")
                         
                         command = f'rclone copy -v --log-file sync_manga.log "{filename.rstrip()}" "{rclone_provider}:Manga/{od_path.rstrip()}"'
                         os.system(command)
@@ -50,9 +52,13 @@ def sync_to_rclone():
                     try:
                         os.remove(filename)
                     except:
-                        print("Error removing file?")
+                        func_log_to_file("Error removing file?")
 
-                    identified_filenames_array.append(filename)
+                    identified_filenames_dict = {}
+                    identified_filenames_dict['source'] = str(filename)
+                    identified_filenames_dict['dest'] = od_path.rstrip()
+
+                    identified_filenames_array.append(identified_filenames_dict)
 
     log_entry = "----------- Files downloaded but not synced -----------"
 
@@ -67,19 +73,25 @@ def sync_to_rclone():
             with io.open(log_file_name, "a+", encoding='utf-8') as temp:
                 temp.write(str(filename + "\n"))
 
-            print("File downloaded but not synced:", filename)
+            func_log_to_file(f"File downloaded but not synced: {filename}")
+
+            not_synced_filenames_dict = {}
+            not_synced_filenames_dict['source'] = str(filename)
+            not_synced_filenames_dict['dest'] = None
+
             not_synced_filenames_array.append(filename)
 
     if len(identified_filenames_array) >= 1:
         #command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
         #os.system(command)
         func_send_email(cur_day, log_file_name)
+        #func_send_email(cur_day, log_file_name, identified_filenames_array, not_synced_filenames_array)
     elif len(not_synced_filenames_array) >= 1:
         #command = f'mail -s "MangaDex Sync for {cur_day}" root <{log_file_name}'
         #os.system(command)
         func_send_email(cur_day, log_file_name)
     else:
-        print("No files synced, not emailing")
+        func_log_to_file("No files synced, not emailing")
         os.remove(log_file_name)
 
     return identified_filenames_array

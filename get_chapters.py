@@ -4,6 +4,7 @@ import time
 import traceback
 import zipfile
 import csv
+import datetime
 
 import requests
 from dateutil import parser
@@ -12,7 +13,7 @@ from requests.adapters import HTTPAdapter, Retry
 from tqdm import tqdm
 
 from get_title import func_get_chapter_name
-from utils import check_downloaded, check_downloaded_new
+from utils import check_downloaded, check_downloaded_new, func_log_to_file
 
 os_name = platform.system()
 ua = UserAgent(verify_ssl=False)
@@ -35,13 +36,13 @@ def func_download_chapter(chapter_id, ignore, version):
         has_been_downloaded_old = check_downloaded(chapter_id)
 
         if has_been_downloaded_old is True:
-            print("Already downloaded (Original):", chapter_id)
+            func_log_to_file(f"Already downloaded (Original): {chapter_id}")
             return
 
         has_been_downloaded_new = check_downloaded_new(chapter_id, version)
 
         if has_been_downloaded_new is True:
-            print("Already downloaded (New!):", chapter_id)
+            func_log_to_file(f"Already downloaded (New!): {chapter_id}")
             return
 
     dest_zip_file, date_added = func_get_chapter_name(chapter_id)
@@ -54,7 +55,7 @@ def func_download_chapter(chapter_id, ignore, version):
 
         downloaded.write(chapter_id + "\n")
         downloaded.close()
-        print("ZIP file downloaded already, returning")
+        func_log_to_file("ZIP file downloaded already, returning")
         return
 
     chapter_data = s.get(
@@ -66,12 +67,12 @@ def func_download_chapter(chapter_id, ignore, version):
         chapter_hash = None
 
     if not chapter_hash:
-        print("No chapter hash available, could be that the chapter isn't available yet!")
+        func_log_to_file("No chapter hash available, could be that the chapter isn't available yet!")
 
         chapter_data = s.get(
             url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
 
-        print("PublishAt: {}".format(
+        func_log_to_file("PublishAt: {}".format(
             chapter_data["data"]["attributes"]["publishAt"]))
         return
 
@@ -109,7 +110,7 @@ def func_download_chapter(chapter_id, ignore, version):
                 "cached": cached
             }
 
-            print("Error downloading chapter, reporting")
+            func_log_to_file("Error downloading chapter, reporting")
 
             auth_response = s.post(
                 url="https://api.mangadex.network/report", json=params)
@@ -128,11 +129,11 @@ def func_download_chapter(chapter_id, ignore, version):
                     size = file.write(data)
                     bar.update(size)
         except Exception as ex:
-            print("Error downloading file: {}".format(img))
-            print("Error:", ex)
+            func_log_to_file(f"Error downloading file: {img}")
+            func_log_to_file("Error:", ex)
             traceback.print_exc()
 
-            print("Img:", chapter_url)
+            func_log_to_file(f"Img: {chapter_url}")
 
             os.remove(img)
 
@@ -168,11 +169,11 @@ def func_download_chapter(chapter_id, ignore, version):
 
     try:
         if not all([os.path.isfile(page) for page in filenames]):
-            print('Aborting archive')
+            func_log_to_file('Aborting archive')
             for page in filenames:
-                print('Missing:', page)
+                func_log_to_file('Missing:', page)
     except:
-        print("failed to download chapter:", filenames)
+        func_log_to_file(f"failed to download chapter: {filenames}")
 
     zf = zipfile.ZipFile(dest_zip_file, mode='w')
 
@@ -197,7 +198,7 @@ def func_download_chapter(chapter_id, ignore, version):
         os.utime(os.path.join(path, dest_zip_file),
                  (date_added_tuple, date_added_tuple))
     except:
-        print("Error changing time")
+        func_log_to_file("Error changing time")
 
     #if os.path.exists(dest_zip_file):
     #    downloaded = open("downloaded.txt", "a")
@@ -205,13 +206,12 @@ def func_download_chapter(chapter_id, ignore, version):
     #    downloaded.close()
 
     with open("downloaded.csv", mode="a+", encoding="utf-8", newline="") as file:
-        file_writer = csv.writer(
-            file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL
-        )
+        file_writer = csv.writer(file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL)
 
         file_writer.writerow(
             [
                 chapter_id,
                 version,
+                datetime.datetime.now(datetime.timezone.utc).isoformat()
             ]
         )

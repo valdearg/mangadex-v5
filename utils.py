@@ -5,9 +5,26 @@ import urllib
 import html
 import pandas as pd
 import csv
+import time
+import io
+import socket
+from datetime import datetime, timedelta
+import pytz
+from pathlib import Path
 
 import requests
 
+hostname = socket.gethostname()
+
+
+def func_log_to_file(log_entry):
+    cur_day = time.strftime("%Y-%m-%d")
+    log_file_name = f"{cur_day}-{hostname}-mangadex.log"
+    cur_time = time.strftime("%Y-%m-%d %H:%M:%S")
+    log_entry = f"{cur_time} : {log_entry}"
+    with io.open(log_file_name, "a+", encoding="utf-8") as temp:
+        temp.write(str("\n" + log_entry))
+    print(log_entry)
 
 def check_downloaded(chapter_id):
     with open('downloaded.txt') as file:
@@ -23,13 +40,36 @@ def check_downloaded_new(chapter_id, version):
     version = str(version)
 
     for manga in data.values:
-        if manga[0] == chapter_id and manga[1] == version:
-            #print(f"Found existing chater download: {version} for ID: {chapter_id}")
+        csv_chapter_id = manga[0]
+        try:
+            csv_chapter_version = int(manga[1])
+        except ValueError:
+            csv_chapter_version = 1
+
+        if csv_chapter_id == chapter_id and str(csv_chapter_version) == version:
+            #func_log_to_file(f"Found existing chater download: {version} for ID: {chapter_id}")
             return True
 
     return False
 
+def check_last_time_processed(manga_id):
+    data = pd.read_csv("FollowedManga.csv", sep="$")
 
+    is_more_than_threshold = False
+    does_manga_exist = False
+
+    for manga in data.values:
+        if manga_id == manga[0]:
+            func_log_to_file(f"Found last updated for manga: {manga[1]} for ID: {manga_id}: date is: {manga[2]}")
+            
+            timestamp = datetime.fromisoformat(manga[2])
+            now = datetime.now(pytz.timezone("UTC"))
+
+            threshold_days_ago = now - timedelta(days=30)
+            is_more_than_threshold = timestamp < threshold_days_ago
+            does_manga_exist = True
+
+    return is_more_than_threshold, does_manga_exist
 
 def clean_filename(filename):
     filename = filename.replace("...", "")
@@ -67,7 +107,7 @@ def func_login():
         url="https://api.mangadex.org/auth/login", json=auth)
 
     if auth_response.status_code != 200:
-        print(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
+        func_log_to_file(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
         if os.path.exists('running'):
             os.remove('running')
         quit()
@@ -92,7 +132,7 @@ def func_login_client_id():
         url="https://auth.mangadex.org/realms/mangadex/protocol/openid-connect/token", data=auth)
 
     if auth_response.status_code != 200:
-        print(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
+        func_log_to_file(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
         if os.path.exists('running'):
             os.remove('running')
         quit()
@@ -119,9 +159,9 @@ def check_login(sess):
     result = jsonText['result']
 
     if result == "ok":
-        print("Logged in still")
+        func_log_to_file("Logged in still")
     else:
-        print("Expired session, logging in again")
+        func_log_to_file("Expired session, logging in again")
         sess = func_login()
 
     return sess
@@ -130,7 +170,7 @@ def refresh_login_client_id():
     if os.path.exists(".mdauth_client_id"):
         auth_response = json.loads(open(".mdauth_client_id", "r", encoding="utf-8").read())
     else:
-        print("No existing auth, run the auth first")
+        func_log_to_file("No existing auth, run the auth first")
         return
 
     auth = {
@@ -144,7 +184,7 @@ def refresh_login_client_id():
         url="https://auth.mangadex.org/realms/mangadex/protocol/openid-connect/token", data=auth)
 
     if auth_response.status_code != 200:
-        print(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
+        func_log_to_file(f"Error with MangaDex, response from API: {auth_response.status_code} exiting")
         if os.path.exists('running'):
             os.remove('running')
         quit()
@@ -161,10 +201,10 @@ def get_manga_title(manga_id):
 
     for manga in data.values:
         if manga_id == manga[0]:
-            print(f"Found title: {manga[1]} for ID: {manga_id}")
+            func_log_to_file(f"Found title: {manga[1]} for ID: {manga_id}")
             return manga[1]
 
-    print("Manga ID not found, locating the new name")
+    func_log_to_file("Manga ID not found, locating the new name")
 
     manga_data = requests.get(
         url=f"https://api.mangadex.org/manga/{manga_id}").json()['data']
@@ -181,7 +221,7 @@ def get_manga_title(manga_id):
         manga_name = clean_filename(manga_name)
         full_title = f'{manga_name}'
 
-    print(f"{full_title} ({manga_id})")
+    func_log_to_file(f"{full_title} ({manga_id})")
 
     with open("MangaTitleDatabase.csv", mode="a+", encoding="utf-8", newline="") as file:
         file_writer = csv.writer(
@@ -196,3 +236,21 @@ def get_manga_title(manga_id):
         )
 
     return full_title
+
+def func_archive_log_files():
+    log_files = Path(".").glob("*runner.log")
+    for log_file in log_files:
+        date_str = str(log_file).split("-", 4)
+        date_str = f"{date_str[0]}-{date_str[1]}-{date_str[2]}"
+        file_date = datetime.strptime(date_str, "%Y-%m-%d")
+
+        time_difference = datetime.now() - file_date
+
+        if time_difference > timedelta(days=7):
+            new_log_name = os.path.join(
+                log_file.parent.resolve(), "Logs", log_file.name
+            )
+            print(new_log_name)
+            os.rename(
+                os.path.join(log_file.parent.resolve(), log_file.name), new_log_name
+            )

@@ -52,9 +52,7 @@ for manga_id in list_response:
     print(f"{full_title} ({manga_id})")
 
     with open("MangaTitleDatabase.csv", mode="a+", encoding="utf-8", newline="") as file:
-        file_writer = csv.writer(
-            file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL
-        )
+        file_writer = csv.writer(file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL)
 
         file_writer.writerow(
             [

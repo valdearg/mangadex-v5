@@ -2,7 +2,7 @@ import requests
 
 from replacements import check_replacements
 from blocked_groups import check_blocked_group
-from utils import clean_filename, get_manga_title
+from utils import clean_filename, get_manga_title, func_log_to_file
 
 
 def func_get_chapter_name(chapter_id):
@@ -65,6 +65,6 @@ def func_get_chapter_name(chapter_id):
 
     full_title = clean_filename(full_title)
 
-    print(f'Full title now: {full_title} ({updated_at})')
+    func_log_to_file(f'Full title now: {full_title} ({updated_at})')
 
     return full_title, updated_at
