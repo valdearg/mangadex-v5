@@ -98,10 +98,18 @@ def clean_filename(filename):
 
 
 def func_login():
-    auth = {
-        "username": "valdearg",
-        "password": "RpfiPqHiyNRX3H@?b!CQ&?KkB9enGnN!tP$nGJBL"
-    }
+
+    if os.path.exists(".auth"):
+        auth_data = json.loads(open(".auth", "r", encoding="utf-8").read())
+
+        auth = {
+            "grant_type": "password",
+            "username": auth_data["username"],
+            "password": auth_data["password"],
+        }
+    else:
+        print("The .auth file does not exist")
+        quit()
 
     auth_response = requests.post(
         url="https://api.mangadex.org/auth/login", json=auth)
@@ -120,13 +128,20 @@ def func_login():
     return token
 
 def func_login_client_id():
-    auth = {
-        "grant_type": "password",
-        "username": "valdearg",
-        "password": "RpfiPqHiyNRX3H@?b!CQ&?KkB9enGnN!tP$nGJBL",
-        "client_id": "personal-client-f4e71288-fa1b-431c-9b77-a290f8c1da0e-8aad6250",
-        "client_secret": "BRvu70DMpdaj3m7SCa16ilUSeiXKutzQ"
-    }
+
+    if os.path.exists(".auth"):
+        auth_data = json.loads(open(".auth", "r", encoding="utf-8").read())
+
+        auth = {
+            "grant_type": "password",
+            "username": auth_data["username"],
+            "password": auth_data["password"],
+            "client_id": auth_data["client_id"],
+            "client_secret": auth_data["client_secret"]
+        }
+    else:
+        print("The .auth file does not exist")
+        quit()
 
     auth_response = requests.post(
         url="https://auth.mangadex.org/realms/mangadex/protocol/openid-connect/token", data=auth)
@@ -238,8 +253,9 @@ def get_manga_title(manga_id):
     return full_title
 
 def func_archive_log_files():
-    log_files = Path(".").glob("*runner.log")
+    log_files = Path(".").glob("*-runner-mangadex.log")
     for log_file in log_files:
+        func_log_to_file(f"Removing log file: {str(log_file)}")
         date_str = str(log_file).split("-", 4)
         date_str = f"{date_str[0]}-{date_str[1]}-{date_str[2]}"
         file_date = datetime.strptime(date_str, "%Y-%m-%d")
@@ -247,10 +263,6 @@ def func_archive_log_files():
         time_difference = datetime.now() - file_date
 
         if time_difference > timedelta(days=7):
-            new_log_name = os.path.join(
-                log_file.parent.resolve(), "Logs", log_file.name
-            )
+            new_log_name = os.path.join(log_file.parent.resolve(), "Logs", log_file.name)
             print(new_log_name)
-            os.rename(
-                os.path.join(log_file.parent.resolve(), log_file.name), new_log_name
-            )
+            os.rename(os.path.join(log_file.parent.resolve(), log_file.name), new_log_name)
