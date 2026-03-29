@@ -26,8 +26,10 @@ retries = Retry(total=10,
 
 s.mount('https://', HTTPAdapter(max_retries=retries))
 
+md_at_home_url_backup = "https://uploads.mangadex.org"
 
-def func_download_chapter(chapter_id, ignore, version):
+
+def func_download_chapter(chapter_id, ignore, version, report=False):
     head = {
         "Content-Type": "application/json"
     }
@@ -92,8 +94,15 @@ def func_download_chapter(chapter_id, ignore, version):
         if len(counting[0]) > 10:
             img = f"{img_num}-{counting[1]}"
 
-        resp = s.get(chapter_url, stream=True,
-                     headers={'User-Agent': ua.chrome})
+        resp = s.get(chapter_url, stream=True, headers={'User-Agent': ua.chrome})
+        
+        if resp.status_code == 404:
+            func_log_to_file(f"Chapter image not found (404): {chapter_url}")
+            
+            chapter_url = f"{md_at_home_url_backup}/data/{chapter_hash}/{img}"
+            
+            resp = s.get(chapter_url, stream=True, headers={'User-Agent': ua.chrome})
+        
         total = int(resp.headers.get('content-length', 0))
 
         if resp.headers.get('X-Cache') == "HIT":
@@ -110,14 +119,15 @@ def func_download_chapter(chapter_id, ignore, version):
                 "cached": cached
             }
 
-            func_log_to_file("Error downloading chapter, reporting")
+            func_log_to_file(f"Error downloading chapter, reporting: {resp.status_code} {resp.reason} - {chapter_url}")
 
-            auth_response = s.post(
-                url="https://api.mangadex.network/report", json=params)
+            if report:
+                auth_response = s.post(url="https://api.mangadex.network/report", json=params)
 
             return
 
         try:
+            func_log_to_file(f"Downloading image: {chapter_url}")
             with open(img, 'wb') as file, tqdm(
                     desc=img,
                     total=total,
@@ -128,6 +138,7 @@ def func_download_chapter(chapter_id, ignore, version):
                 for data in resp.iter_content(chunk_size=1024):
                     size = file.write(data)
                     bar.update(size)
+            func_log_to_file("Completed downloading image")
         except Exception as ex:
             func_log_to_file(f"Error downloading file: {img}")
             func_log_to_file("Error:", ex)
@@ -150,8 +161,12 @@ def func_download_chapter(chapter_id, ignore, version):
                 "cached": cached
             }
 
-            auth_response = s.post(
-                url="https://api.mangadex.network/report", json=params)
+            if report:
+                auth_response = s.post(url="https://api.mangadex.network/report", json=params)
+
+                func_log_to_file(f"Reporting took: {auth_response.elapsed.microseconds}")
+
+            func_log_to_file(f"Image download took: {resp.elapsed.microseconds} ms")
 
         else:
             params = {
