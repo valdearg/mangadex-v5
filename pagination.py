@@ -12,17 +12,19 @@ from utils import func_log_to_file
 
 
 def paged_result(manga_id):
+    content_rating = ["safe", "suggestive", "erotica", "pornographic"]
+
     head = {
         "Content-Type": "application/json"
     }
 
     param = {
         "manga": manga_id,
-        "translatedLanguage[]": "en"
+        "translatedLanguage[]": "en",
+        "contentRating[]": content_rating
     }
 
-    results = requests.get("https://api.mangadex.org/chapter",
-                           headers=head, params=param).json()
+    results = requests.get("https://api.mangadex.org/chapter", headers=head, params=param).json()
 
     total = results['total']
 
@@ -37,7 +39,8 @@ def paged_result(manga_id):
             "manga": manga_id,
             "limit": "100",
             "offset": offset,
-            "translatedLanguage[]": "en"
+            "translatedLanguage[]": "en",
+            "contentRating[]": content_rating
         }
 
         results = requests.get(
@@ -51,4 +54,4 @@ def paged_result(manga_id):
 
     func_log_to_file(f"Total chapters: {total}")
 
-    return chapter_id_arr
+    return chapter_id_arr, total
