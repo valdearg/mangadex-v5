@@ -88,7 +88,7 @@ def func_download_all_followed(ignore):
             func_log_to_file("Already downloaded all items, skipping")
             continue
 
-        chapters = paged_result(manga_id)
+        chapters, chapter_count = paged_result(manga_id)
 
         chapter_num = 0
 

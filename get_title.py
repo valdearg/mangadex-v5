@@ -55,7 +55,8 @@ def func_get_chapter_name(chapter_id):
         full_title = f'{full_title} (v{volume_num})'
 
     if chapter_title:
-        full_title = f'{full_title} - {chapter_title}'
+        if len(chapter_title) <= 100:
+            full_title = f'{full_title} - {chapter_title}'
 
     try:
         full_title = f'{full_title} [MangaDex, {group_name}].zip'

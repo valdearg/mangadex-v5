@@ -1,8 +1,12 @@
 import requests
+import sys
+import time
+import os 
 
 from utils import func_login_client_id, func_log_to_file
 from get_chapters import func_download_chapter
 from get_title import func_get_chapter_name
+from send_email import func_send_email
 
 
 def func_get_feed(download, ignore):
@@ -29,6 +33,12 @@ def func_get_feed(download, ignore):
         url="https://api.mangadex.org/user/follows/manga/feed", headers=head, params=param)
 
     func_log_to_file(list_response.status_code)
+
+    if list_response.status_code > 200:
+        os.remove("running")
+        cur_day = time.strftime('%Y-%m-%d-%H-%M')
+        func_send_email(cur_day,"MangaDex Sync: Error with API!")
+        sys.exit("Error with API")
 
     with open("Feed.json", "w") as f:
         f.write(list_response.text)

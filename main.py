@@ -9,6 +9,8 @@ import requests
 from requests.auth import HTTPBasicAuth
 from requests.adapters import HTTPAdapter, Retry
 from tendo import singleton
+import pandas as pd
+import csv
 
 from pagination import paged_result
 from get_chapters import func_download_chapter
@@ -39,6 +41,7 @@ parser.add_argument('-m', '--manga', required=False)
 parser.add_argument('-s', '--sync', required=False, action='store_true')
 parser.add_argument('-a', '--all', required=False, action='store_true')
 parser.add_argument('-sk', '--skipcheck', required=False, action='store_true')
+parser.add_argument('-cc', '--countchapters', required=False, action='store_true')
 
 args = parser.parse_args()
 
@@ -48,8 +51,17 @@ func_log_to_file(f"Skipping checking for running: {args.skipcheck}")
 
 if os.path.exists('running') and args.skipcheck is False:
     cur_day = time.strftime('%Y-%m-%d-%H-%M')
-    func_send_email(cur_day,"MangaDex Sync: running already")
-    sys.exit("Mangadex running already")
+
+    file_age_minutes = (time.time() - os.path.getmtime('running')) / 60
+
+    func_log_to_file(f"Running file exists, age: {file_age_minutes}")
+
+    if file_age_minutes > 120:
+        func_log_to_file("Running file is old, removing!")
+        os.remove("running")
+    else:
+        func_send_email(cur_day,"MangaDex Sync: running already")
+        sys.exit("Mangadex running already")
 elif args.skipcheck is True:
     func_log_to_file("The skip option is set, so skipping check")
 else:
@@ -107,12 +119,9 @@ if args.chapter:
         if "mangadex" in chapter_id:
             chapter_id = chapter_id.split('/')[-1]
 
-        head = {
-            "Content-Type": "application/json"
-        }
+        head = {"Content-Type": "application/json"}
         
-        chapter_data = s.get(
-            url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
+        chapter_data = s.get(url=f"https://api.mangadex.org/chapter/{chapter_id}", headers=head).json()
         
         volume = chapter_data["data"]["attributes"]["volume"]
             
@@ -131,7 +140,7 @@ if args.manga:
         if "http" in manga_id:
             manga_id = manga_id.split("/")[-2]
             
-        chapters = paged_result(manga_id)
+        chapters, chapter_count = paged_result(manga_id)
 
         num = 0
 
@@ -141,6 +150,27 @@ if args.manga:
             version = chapter[1]
             func_log_to_file(f"Downloading chapter: {chapter} ({num}/{len(chapters)})")
             func_download_chapter(chapter_id, args.ignore, version)
+
+
+if args.countchapters:
+    data = pd.read_csv("MangaTitleDatabase.csv", sep="$", header=None)
+    start_time = time.strftime('%Y-%m-%d-%H-%M')
+
+    for manga in data.values:
+        chapters, chapter_count = paged_result(manga[0])
+
+        func_log_to_file(f"Found title: {manga[1]} for ID: {manga[0]}, count: {chapter_count}")
+
+        with open(f"{start_time}-ChapterCount.csv", mode="a+", encoding="utf-8", newline="") as file:
+            file_writer = csv.writer(file, delimiter="$", quotechar='"', quoting=csv.QUOTE_ALL)
+
+            file_writer.writerow(
+                [
+                    manga[0],
+                    manga[1],
+                    chapter_count
+                ]
+            )
 
 if args.sync:
     func_log_to_file("Syncing to cloud!")
@@ -154,9 +184,7 @@ if args.sync:
 
             func_log_to_file("Scan Komga lib")
 
-            head = {
-                "Content-Type": "application/json"
-            }
+            head = { "Content-Type": "application/json"}
 
             komga_data = json.loads(open(".komga", "r", encoding="utf-8").read())
 
