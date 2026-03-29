@@ -255,7 +255,7 @@ def get_manga_title(manga_id):
 def func_archive_log_files():
     log_files = Path(".").glob("*-runner-mangadex.log")
     for log_file in log_files:
-        func_log_to_file(f"Removing log file: {str(log_file)}")
+        #func_log_to_file(f"Removing log file: {str(log_file)}")
         date_str = str(log_file).split("-", 4)
         date_str = f"{date_str[0]}-{date_str[1]}-{date_str[2]}"
         file_date = datetime.strptime(date_str, "%Y-%m-%d")
